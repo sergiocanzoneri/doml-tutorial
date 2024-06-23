@@ -1,0 +1,1685 @@
+/*
+ * DOML 3.1 Tutorial
+ * 
+ * This tutorial aims at showing in a simple but complete way how to use the DOML language
+ * to define and deploy cloud-based applications inside the PIACERE framework.
+ * 
+ * DOML is a declarative language. A DOML model has a layered structure:
+ * each of the layers describes what the application and infrastructure
+ * should look like after all the deploying is done.
+ * 
+ * In addition, DOML is intended to be used with the PIACERE optimization mechanisms.
+ * To achieve this DOML allows the user to define different application deployment configurations,
+ * as well as different infrastructure configurations, and it includes a specific layer
+ * to define optimization objectives and constraints.
+ * 
+ * Moreover, DOML includes extension mechanisms that allow the user to create new concepts
+ * for any of the layers in DOML, as well as extend existing ones with new properties and attributes.
+ * 
+ * As already mentioned, a DOML model is composed of different layers.
+ * Here we list the different layers and sections a DOML model should have,
+ * to give the user a first view of how the model itself should look like:
+ * 
+ * 	- Application Layer
+ * 	- Infrastructure Layer
+ * 	- Deployment Configurations
+ * 	- Concrete Layer
+ * 	- Functional Requirements
+ * 	- Optimization Layer
+ * 
+ * Both the Functional Requirements section and the Optimization Layer are not mandatory
+ * and could, therefore, not be present in a model.
+ * 
+ * This part of the tutorial is intended to show in detail the use of the different elements
+ * that compose a DOML Model.
+ * Step by step, this tutorial guides the user through building a DOML Model.
+ * 
+ * Any element defined in the DOML language is a DOMLElement.
+ * Most of the DOMLElements are defined through the use of a keyword followed by an ID and curly braces.
+ * Please note that IDs must not include any blank space: this rule also applies to project names.
+ * For any DOMLElement, we can specify a textual description, and some properties within the braces.
+ * After defining possible properties, we can describe sub-elements and specify attributes.
+ * Please note that description and properties always need to be specified before any sub-element or attribute.
+ * 
+ * First of all, let's start creating a DOML Model by using the keyword "doml" followed by an ID.
+ * For this example, we have chosen to name our model "doml_tutorial".
+ * 
+ * After specifying the ID, we use curly braces: this structure is recurrent in DOML
+ * and used for the specification of almost every kind of element.
+ * 
+ * Within the curly braces, we must specify the DOML version we're using:
+ * to do so, we use the keyword "version" followed by the DOML version number between quotation marks,
+ * i.e., "3.1" in this case.
+ * 
+ * As written above, when defining an element, we could specify an optional textual description
+ * by using the keyword "desc" followed by the description text between quotation marks.
+ * 
+ * We may also want to specify additional information about the element we're considering:
+ * to do so, we could use properties.
+ * DOML allows the usage of five types of properties: integer values, float values, strings,
+ * boolean values, and list-properties including any number and kind of other properties.
+ * Please note that to specify a float value in DOML, the user needs to use the decimal point
+ * and specify at least one digit after it (e.g., 10.0 is interpreted as a float value,
+ * whereas 10 is interpreted as an integer value).
+ * 
+ * To add properties to any element, we can use the keyword "properties"
+ * followed by braces, within which we can define them.
+ * Each property must have a key (identifier), the "=" symbol, and its associated value.
+ * For list-properties, we use square brackets right after the "=" symbol and specify
+ * any property belonging to the list within them.
+ * 
+ * Our model is the container for all the DOML layers,
+ * each of which provides a different point of view of the design space of the application.
+ */ 
+doml doml_tutorial {
+	version "3.1"
+	desc "This DOML model works as an example to show user how the DOML syntax works."
+	properties {
+		// We can define any kind of property for every DOMLElement.
+		int_property = 10
+		float_property = 10.5
+		boolean_property = true
+		string_property = "string"
+		list_property = [
+			i_prop = 10
+			f_prop = 5.3
+			// and so on...
+		]
+	}
+	
+	/*
+	 * Let's take a look at the first layer we have to define, which is the Application Layer, used to describe
+	 * the components and building blocks that compose the applications and their functional requirements.
+	 * To define the Application Layer, we use the keyword "application" followed by an ID and curly braces.
+	 */
+	application app_layer {
+		
+		/*
+		 * Here we provide another example of both description and properties, this time referring
+		 * to the application layer.
+		 */
+		desc "The layer in which we describe components and building blocks that compose the applications and their functional requirements."
+		
+		properties {	
+			// Other examples of properties...
+			var1 = 20
+			is_configured = false
+		}
+		
+		/*
+		 * Let's now take a look at the different types of application components we can define.
+		 * 
+		 * Let's start by using the DBMS class, which, as suggested by the name, is used to model a DBMS component.
+		 * We can define a DBMS by using the keyword "dbms" followed by an ID.
+		 */
+		dbms dbms1 {
+			
+			/*
+			 * For a DBMS, we may want to specify a license cost (in Euro), which can be done by using the "cost" attribute.
+			 * The cost is expressed as a float value and is optional.
+			 */
+			cost 125.49
+			
+			
+			/* 
+			 * An application component may use or provide software interfaces,
+			 * which create links among components, APIs, and other functional elements in the application layer.
+			 * 
+			 * For example, our DBMS may provide a SQL interface, which may be used by a web server.
+			 * 
+			 * To specify the provided interfaces, we can use the keyword "provides", followed by braces.
+			 * Within the braces, we can list such interfaces, separating IDs using blank spaces or new lines.
+			 * List of IDs are handled analogously for all elements in DOML.
+			 * 
+			 * Analogously, to specify the used interfaces, we use the keyword "consumes" and proceed in the same way.
+			 * This is shown below in the tutorial, for other components.
+			 * 
+			 * Let's consider one provided interface with ID "sql_interface" for now.
+			 */
+			provides { sql_interface }
+	
+		}
+		
+		/* 
+		 * We can use the SoftwareComponent class to model any of the functional software components that conform to an application in DOML.
+		 * To define a software component, we use the keyword "software_component" followed by an ID and braces.
+		 * For this example, let's suppose we want to model a web server.
+		 * As already done for DBMS, also for functional components we could specify a license cost (in Euro), as done in the example above.
+		 */
+		software_component web_server {
+			
+			/* 
+			 * As already stated before, an application component may use some software interfaces provided by other components.
+			 * For example, the web server may use the SQL interface provided by the DBMS component we defined above.
+			 * To specify the used interfaces, we can use the keyword "consumes", followed by braces.
+			 * Within the braces, we can list such interfaces, specifying their IDs.
+			 * Let's assume our web server also uses another interface called "ext_interface".
+			 */
+			consumes { 
+				sql_interface
+				ext_interface
+			}
+		}
+		
+		/*
+		 * Let's now look at another example of a functional software component.
+		 */
+		software_component src_example {
+		
+			/*
+			 * For any functional software component, we can also describe its source code.
+			 * To do so, we use the keyword "source" followed by an ID and braces.
+			 * We can define the source entry point, its backend, and, optionally,
+			 * a custom Ansible inventory within the braces.
+			 */
+			source src {
+				
+				// As for any other DOMLElement, e can specify some parameters through the use of properties.
+				properties {
+					// ...
+				}
+				
+				// An optional string attribute to define the entry point of the source code.
+				entry "main.yml"
+				
+				// An optional string attribute to define the backend for executing the source.
+				backend "ansible"
+				
+				// An optional string attribute to point to a custom Ansible inventory.
+				inventory "inventory.j2"
+	
+			}
+			
+		}
+		
+		/* 
+		 * Let's assume the interface "ext_interface" we used above is exposed by an external API we name "ext_api".
+		 * Even though such API is external to our application, it is used by components inside it (in this case, the web server).
+		 * We can use the SaaS Class to model such API or any other external service relevant to our application.
+		 * We, therefore, use the keyword "saas" followed by an ID and braces.
+		 */
+		saas ext_api {	
+			
+			/* 
+			 * Please note that for SaaS we can not specify any consumed interfaces.
+			 * We now have to define the provided interface "ext_interface".
+			 * 
+			 * We may need to specify an endpoint for such interface or any other provided interface,
+			 * indicating the IP address, hostname, or URL through which the service is accessed.
+			 * To specify such an endpoint, we use the symbol "@" after the ID of the provided interface and indicate
+			 * the IP address, hostname, or URL between quotation marks.
+			 * 
+			 * Let's assume, for example, "ext_interface" can be accessed through the following URL: "https://api.extservice.com/get".
+			 */
+			provides { ext_interface @ "https://api.extservice.com/get" }
+		}
+		
+		/* 
+		 * To model database services offered by major cloud providers, we can use the SaaSDBMS class, 
+		 * which serves the purpose of modeling a DBMS providing SaaS.
+		 * It is introduced by the keyword "saas_dbms" followed by an ID.
+		 * As for the SaaS class, it is possible to specify provided interfaces.
+		 * In this example, we describe an Oracle database instance.
+		 */
+		saas_dbms oracledb {
+			
+		 	// properties ...
+		 	
+		 	// An optional string attribute to specify the database name.
+		 	name "my-oracle"
+		 	
+		 	// An optional string attribute to specify the engine name.
+		 	engine "oracle-se2"
+		 	
+		 	// An optional string attribute to specify the engine version.
+		 	engine_version "19"
+			
+		 	// provides ...
+		 	
+		}
+	}
+	
+	
+	/*
+	 * Let's now move to the next layer: the Infrastructure Layer, which describes the abstract infrastructure elements 
+	 * that will be supporting the execution of the application described in the Application Layer.
+	 * Similarly to what we've done for the Application Layer, we can use the keyword "infrastructure" followed by an ID
+	 * and describe the components of this layer within braces.
+	 */
+	infrastructure infra_layer {
+	 	
+	 	/*
+	 	 * We can define a hierarchy of the elements belonging to this layer.
+	 	 * First, we can find the computing nodes, which are any elements that can be used for computing.
+	 	 * Main categories of computing nodes are servers, virtual machines, and containers.
+	 	 * Let's take a look at each of them.
+	 	 */
+	 	  
+	 	/*
+	 	 * Physical nodes available for the owner of a cloud application, which are going to be used as part of the cloud deployment,
+	 	 * can be modeled through the PhysicalComputingNode class.
+	 	 * 
+	 	 * We use the keyword "node" followed by an ID to define such components.
+	 	 * Within the braces, we can define specific attributes of the computing node, such as its internal architecture or total memory.
+	 	 * In the following example, each of such attributes is presented to the user.
+	 	 */
+	 	node physical_server {
+	 	 	  		
+	 	   	// An optional string attribute describing the internal architecture of the computing node.
+	 	   	arch "x86-64"
+	 	   		
+	 	   	// An optional string attribute describing the operating system of the computing node.
+	 	   	os "CentOS-7-2111"
+	 	   		
+	 	   	// An optional float attribute describing the total memory (in MB) of the node.
+	 	   	mem_mb 8192.0
+	 	   		
+	 	   	// An optional float attribute describing the total storage available in the node in GB.
+	 	   	sto 10.0
+	 	   		
+	 	   	// An optional integer attribute describing the number of CPUs of the computing node.
+	 	   	cpu_count 4
+	 	   		
+	 	   	/*
+	 	   	 * Next, we could also define network interfaces through the NetworkInterface class, introduced by the keyword "iface".
+	 	   	 * Network interfaces represent the means to interconnect computing nodes.
+	 	   	 * We can specify zero to multiple network interfaces, each one with its attributes.
+	 	   	 * Let's see how network interfaces are described in detail.
+	 	   	 */
+	 	   	iface phser_net1 {
+	 	   				
+	 	   		// An optional string attribute describing the maximum speed of this network interface.
+	 	   		speed "100mbps"
+	 	   			
+	 	   		// An optional string attribute defining the endpoint of this network interface inside the network.
+	 	   		address "16.0.0.1"
+	 	   			
+	 	   		/*
+	 	   		 * A reference to the network (or subnet) associated with this interface.
+	 	   		 * Networks (and subnets) definition is shown below in this tutorial.
+	 	   		 * For this example, let's assume this interface is associated with a network having ID "net1".
+	 	   		 * 
+	 	   		 * Please note that this reference could also be specified in the definition of the network (or subnet).
+	 	   		 * It is sufficient to specify each reference once, but the user is left free to express
+	 	   		 * such a piece of information twice, using the two different ways, in a DOML Model.
+	 	   		 */
+	 	   		belongs_to net1
+	 	   		 
+	 	   		/*
+				 * An optional list of security groups IDs to be associated with the interface.
+				 * The definition of security groups is shown below in this tutorial.
+				 * As for the "belongs_to" reference, the reference to security groups could
+				 * be specified in the definition of another class (i.e., the SecurityGroup class).
+				 * Analogously to what specified for the previous case, it is sufficient to express
+				 * such a reference one way or another, but the user is free to repeat it twice.
+				 */
+	 	   		security {
+	 	   			sec_group
+	 	   		}
+	 	   	}
+	 	   		
+	 	   	/*
+	 	   	 * Let's define a second network interface to provide another example.
+	 	   	 */
+	 	   	iface phser_config_iface {
+	 	   		
+	 	   		belongs_to net2_sub1
+	 	   		
+	 	   	}
+	 	   	
+	 	   	// An optional reference to specify which network interface must be used to configure the machine.
+	 	   	config_iface phser_config_iface
+	 	   	
+	 	   	/*
+	 	   	 * A reference to the credentials for this computing node (if existing). 
+	 	   	 * Credentials definition is shown below in this tutorial.
+	 	   	 * For this example, let's assume this computing node can be accessed through key credentials having ID "phser_credentials".
+	 	   	 */	   		
+	 	   	credentials phser_credentials
+	
+			// A list of references to the monitoring rules to be applied to this computing node.		
+			monitoring_rules {
+				mon_rule1
+				mon_rule2
+			}
+	 	   	
+	 	   	/*
+	 	   	 * A set of strings defining the monitoring that will not apply to the current computing node.
+	 	   	 * Refer to MonitoringRule class for further information.
+	 	   	 * Users can choose to disable either performance or security monitoring, or both of them.
+	 	   	 * 
+	 	   	 * Possible values for this attribute include "performance" and "security".
+	 	   	 */
+	 	   	disabled_monitorings {
+	 	   		"performance"
+	 	   		"security"
+	 	   	}
+	 	  
+	 	}
+	 	   
+		/*
+		 * We can use the VirtualMachine class to describe virtual computing nodes running on supervisor software. 
+		 * To be automatically configurable, the virtual machine must define the image that will generate it.
+		 * The VMImage class is used to model such images.
+		 * Here is shown how to use the VirtualMachine class, whereas the VMImage class example is shown below in the tutorial.
+		 * 
+		 * To define a virtual machine, we use the keyword "vm" followed by an ID.
+		 * Within the braces, we can specify some important characteristics of the virtual machine through some attributes.
+		 * Some of these attributes and references are the same as the ones shown for the PhysicalComputingNode class
+		 * and, therefore, they're not described in the comments.
+		 */
+	    vm vm1 {
+	      	
+	      	arch "x86-64"
+	      	
+	      	os "CentOS-7-2111"
+	      	
+	      	mem_mb 16384.0
+	      	
+	      	sto 160.0
+	      	
+	      	cpu_count 8
+	      	
+	 	    // An optional string attribute to describe the size of the VM.
+	 	    size "xlarge"
+	 	    	
+	 	   	// We can also specify an optional cost (float) value (Euro), similar to what we can do for DBMS and functional components licenses.
+	 	    cost 209.38
+	 	    	
+	 	    /*
+	 	     * We can also specify where the element should be located (optional).
+	 	     * The Location class is intended to describe the location of infrastructure elements such as VMs.
+	 	     * To specify the location, we use the keyword "loc" followed by braces.
+	 	     * Within the braces, we must specify a region and we can specify a zone to be more precise (optional).
+	 	     * Both these attributes are strings.
+	 	     */
+	 	    loc {
+	 	    	
+	 	    	// This example follows the nomenclature used by the PIACERE Optimizer.
+	 	    	
+	 	    	region "00EU"
+	 	    	
+	 	    	zone "A"
+	 	    
+	 	    }
+	 	    	
+	 	    iface vm1_net1 {
+	 	    
+	 	    	belongs_to net1
+	 	    	
+	 	    	security {
+	 	    		sec_group
+	 	    	}
+	 	    
+	 	    }
+	 	    
+	 	    config_iface vm1_net1
+	 	    	
+	 	    credentials vm1_credentials
+	 	    
+	 	    monitoring_rules {
+	 	    	mon_rule3
+ 	    	}
+	 	    
+	 	    disabled_monitorings {
+	 	    	"performance"
+ 	    	}
+ 	    	
+ 	    	/*
+ 	    	 * An optional reference to the VM image used to generate the VM.
+ 	    	 * The VMImage class is introduced below in this tutorial.
+ 	    	 * Please note that this reference could be specified in the definition
+ 	    	 * of the VMImage too. It is sufficient to specify each reference once,
+ 	    	 * but the user is left free to express such a piece of information twice,
+ 	    	 * using the two different ways, in a DOML Model.
+ 	    	 */
+ 	    	generated_from vm1_img
+	 	    
+	 	}
+	 	    
+	 	/*
+	 	 * The Container class is used to describe virtual computing nodes running on top of other computing nodes, such as Docker containers.
+	 	 * As for VMs, we need to define images generating containers for them to be automatically configurable.
+	 	 * The ContainerImage class is used for such a purpose.
+	 	 * Here is shown how to use the Container class, whereas the ContainerImage class example is shown below in the tutorial.
+	 	 * 
+	 	 * To define a container, we use the keyword "container" followed by an ID.
+	 	 * Within the braces, we can describe one or more configurations for the container,
+	 	 * including the computing node where it's hosted, the port mapping, and the network interface,
+	 	 * as shown below.
+	 	 */
+	 	container cont1 {
+	 	     	
+	 	    /*
+	 	     * To specify one or more configurations on the same host, we use the keyword "host"
+	 	     * followed by the ID of an existing computing node in our cloud architecture.
+	 	     * In this example, we have chosen the VM we defined above ("vm1") as the host of this container.
+	 	     * 
+	 	     * Within the braces, the user can set the environmental variables for such a host
+	 	     * and specify one or more configurations, setting the port mapping and the used network interface.
+	 	     */
+	 	    host vm1 {
+	 	    	
+	 	    	/*
+	 	    	 * The environmental variables can be specified as string properties,
+	 	    	 * using the name of the variable itself as a key, and setting its value.
+	 	    	 * Please note that only string properties can be specified within the
+	 	    	 * curly braces following the "environment" keyword.
+	 	    	 */
+	 	    	environment {
+	 	    		ENV_VAR1 = "env-var1-value"
+	 	    		ENV_VAR2 = "true"
+	 	    		// ...
+	 	    	}
+	 	    	
+	 	    	/*
+	 	    	 * To describe a configuration, we use the keyword "cont_config" followed by curly braces,
+	 	    	 * within which we specify the port mapping and the used network interface through attributes.
+	 	    	 */
+	 	    	cont_config {
+	 	    		
+	 	    		// An integer attribute to specify a container port to be exposed.
+		 	     	cont_port 80
+		 	     	
+		 	     	// An integer attribute to specify a port on a computing node where this container will map to.
+		 	     	vm_port 8080
+		 	     	
+		 	     	// The network interface connected to the container (optional).
+		 	     	iface vm1_net1
+	 	    	}
+	 	    	
+	 	    	// Other configurations on the same host ...
+	 	    	// cont_config { ... }
+	
+	 	    }
+	 	    
+	 	    // Configurations on different hosts ...
+	 	    // host ... { ... }
+	 	    
+	 	    monitoring_rules {
+	 	    	mon_rule2
+	 	    	mon_rule3
+ 	    	}
+	 	    
+	 	    disabled_monitorings {
+	 	    	"security"
+ 	    	}
+ 	    	
+ 	    	/*
+ 	    	 * An optional reference to the container image used to generate the container.
+ 	    	 * The ContainerImage class is introduced below in this tutorial.
+ 	    	 * Analogously to the VMImage reference in the definition of VMs, 
+ 	    	 * this reference could also be specified in the definition of the ContainerImage,
+ 	    	 * but it is sufficient to specify each reference once.
+ 	    	 */
+ 	    	generated_from cont1_img
+	 	  
+	 	}
+	 	
+	 	/*
+	 	 * There may exist dependencies between containers and some of them may share resources,
+	 	 * such as volumes and networks.
+	 	 * To express such concepts, we could use the ContainerGroup class, defining
+	 	 * containers as services within a group.
+	 	 * In the following example, we show how to define two container services within a group.
+	 	 * The two containers share a volume and a network, and "cont_ser2" depends on "cont_ser1".
+	 	 * 
+	 	 * To define a container group, we use the keyword "cont_group" followed by an ID and curly braces.
+	 	 * Within the braces, we can use three different keywords to describe resources:
+	 	 * - "services" is a mandatory keyword, as it allows to define the containers belonging to the group
+	 	 * - "networks" introduces the container networks to be defined
+	 	 * - "volumes" introduces the container volumes to be defined
+	 	 */
+	 	cont_group cg1 {
+	 		
+	 		/*
+	 		 * Within the curly braces following the keyword "services" we can define
+	 		 * one or more containers, in the same way as shown above.
+	 		 */
+ 	    	services {
+ 	    		
+ 	    		container cont_ser1 {
+ 	    			
+ 	    			// Host configurations ...
+ 	    			
+ 	    			/*
+ 	    			 * To specify which networks the service is connected to,
+ 	    			 * we use the keyword "networks" and list the IDs within
+ 	    			 * curly braces, separating them with blank spaces or new lines.
+ 	    			 * Such networks must be defined within the same container group.
+ 	    			 */
+ 	    			networks {
+ 	    				cont_net1
+ 	    			}
+ 	    			
+ 	    			/*
+ 	    			 * To specify the volumes being used by a service,
+ 	    			 * we use the keyword "volumes" and list the IDs within
+ 	    			 * curly braces, separating them with blank spaces or new lines.
+ 	    			 * Such volumes must be defined within the same container group.
+ 	    			 */
+ 	    			volumes {
+ 	    				cont_vol1
+ 	    			}
+ 	    		}
+ 	    		
+ 	    		container cont_ser2 {
+ 	    			
+ 	    			// Host configurations ...
+ 	    			
+ 	    			networks {
+ 	    				cont_net1
+ 	    			}
+ 	    			
+ 	    			volumes {
+ 	    				cont_vol1
+ 	    			}
+ 	    			
+ 	    			/*
+ 	    			 * To express a dependency between containers, we use the keyword
+ 	    			 * "depends_on" followed by curly braces, within which we can specify
+ 	    			 * the IDs of the containers on which a service depends.
+ 	    			 */
+ 	    			depends_on {
+ 	    				cont_ser1
+ 	    			}
+ 	    		}
+ 	    		
+ 	    	}
+ 	    	
+ 	    	networks {
+ 	    		cont_net cont_net1 {
+ 	    			
+ 	    			// An optional string attribute to specify the network name.
+ 	    			name "my-cont-net"
+ 	    			
+ 	    		}
+ 	    	}
+ 	    	
+ 	    	volumes {
+ 	    		cont_vol cont_vol1 {
+ 	    			
+ 	    			// An optional string attribute to specify the volume name.
+ 	    			name "my-cont-vol"
+ 	    			
+ 	    			/*
+ 	    			 * An optional string attribute to specify the container path
+ 	    			 * on which the volume is to be mounted.
+ 	    			 */
+ 	    			path "/example/path"
+ 	    		}
+ 	    	}
+ 	    	
+ 	    }
+		
+		/*
+		 * Specific software services may need to be executed on a properly configured environment.
+		 * To model such an environment, we could make use of the ExecutionEnvironment class.
+		 * To describe elements of this class, we use the keyword "exec_env" followed by an ID and curly braces.
+		 * Different attributes can be used to set up a proper configuration.
+		 */
+		exec_env ex_env1 {
+			
+			// An optional float attribute to specify the available storage.
+			size 16.0
+			
+			/*
+			 * An optional float attribute to specify the maximum available storage
+			 * for environments with scalable capability.
+			 */
+			max_size 256.0
+			
+			// The optional description of a location, following the same syntax shown for VMs.
+			loc {
+				region "00EU"
+				zone "a"
+			}
+			
+			/*
+			 * An optional reference to a network element (in this case, a subnet)
+			 * to which the service needs to be connected to.
+			 */
+			network net2_sub2
+			
+			/*
+			 * An optional list of security groups IDs to be associated with the environment.
+			 * The definition of security groups is shown below in this tutorial.
+			 */
+			security {
+				sec_group
+				// other security groups IDs...
+			}
+		}
+	 	   
+	 	     
+	 	/*
+	 	 * After computing nodes, we can find networks in the Infrastructure Layer.
+	 	 * The Network class describes the means to interconnect computing nodes as part of a cloud architecture.
+	 	 * 
+	 	 * To define a network, we can use the keyword "net" followed by an ID and braces.
+	 	 * The network can be configured through the use of attributes within the braces as shown below.
+	 	 * 
+	 	 * Here we build the first example of a network to show the main aspects and attributes of such elements.
+	 	 * Further attributes are shown in the second example below.
+	 	 * 
+	 	 * Please note that the address range of a network can be specified at the Concrete Layer, as shown below.
+	 	 */
+	 	net net1 {
+	 	  	    	
+	 	    /*
+	 	     * An optional string attribute defining the protocol of the current network.
+	 	     * The default value of this attribute is "TCP/IP".
+	 	     * Please note that the protocol can also be specified at the Concrete Layer.
+	 	     * In case of mismatch, only the protocol specified at the Concrete Layer
+	 	     * will be taken into consideration.
+	 	     */
+	 	    protocol "TCP/IP"
+	 	    
+	 	    /*
+	 	     * Optionally, we can specify an Internet gateway for the network.
+	 	     * Such a gateway can be modeled by using the InternetGateway class and it can be 
+	 	     * defined through the use of the keyword "gateway" followed by an ID and braces.
+	 	     */
+	 	     gateway igw {
+	 	     	
+	 	     	// A string attribute to define the IP address for the gateway.
+	 	     	address "16.0.0.254"
+	 	     	
+	 	     }
+	 	      	
+	 	    /*
+	 	     * The set of IDs of the network interfaces connected to this network.
+	 	     * As shown above, this relation can be expressed using the "belongs_to"
+	 	     * reference in the interface definition, too.
+	 	     */ 
+			ifaces {
+				phser_net1
+				vm1_net1
+			}
+	 	      	
+	 	}
+	 	      
+	 	/*
+	 	 * An important concept for networks is the definition of subnets.
+	 	 * A subnet is a partition of the main network, and, therefore, it is a network too.
+	 	 * To define subnets, we can use the Subnet class, which is a subclass of the Network one.
+	 	 * Let's see how it works by defining another network.
+	 	 */
+	 	net net2 {
+	 		
+	 		protocol "TCP/IP"
+	 	  	
+	 	    /*
+	 	     * Here we want to define subnets.
+	 	     * To define a single subnet, we use the keyword "subnet" followed by an ID and braces.
+	 	     * We can define more than one subnet: in this example, we define two connected subnets,
+	 	     * just to show how the syntax works.
+	 	     */
+	 	    subnet net2_sub1 {
+	 	    	
+	 	    	/*
+	 	       	 * Here we could specify the protocol, but since it is already specified
+	 	       	 * for the main network, we don't have to repeat the same line.
+	 	       	 * As for the main networks, the address range is specified at the Concrete Layer.
+	 	       	 */
+	 	    	   	 	
+	 	       	/*
+	 	       	 * We use the keyword "connections" followed by braces to list the subnets connected to the one we define.
+	 	       	 * Within the braces, we can list the IDs of the connected subnets.
+	 	       	 * For this example, we assume the connected subnet to have ID "net2_sub2".
+	 	       	 * Such a subnet is defined below.
+	 	       	 */
+	 	       	connections {
+	 	       		net2_sub2
+	 	       	}
+	 	       	
+	 	       	// It works in the same way as for networks.
+				ifaces {
+					phser_config_iface
+				}
+	 	    }
+	 	       	 
+	 	    subnet net2_sub2 {
+	 	    	   	 	
+	 	       	connections {
+	 	       		net2_sub1
+	 	       	}
+	 	       	
+	 	    }
+	 	       	
+	 	}
+	 	       
+	 	       
+	 	/*
+	 	 * The next step is defining infrastructure nodes that aim at incrementing the overall storage 
+	 	 * available to the computing nodes in the infrastructure.
+	 	 * The Storage class allows to define such kinds of nodes, which cannot support any functionality
+	 	 * other than providing storage space.
+	 	 * To define a Storage element, we use the keyword "storage" followed by an ID and braces,
+	 	 * within which we can specify some attributes, as shown below.
+	 	 */
+	 	storage hdd1 {
+	 	  	      	
+	 	    // An optional string attribute to specify the label of the storage.
+	 	    label "my-storage"
+	 	        	
+	 	    // An optional integer attribute to specify the size of the storage in GB.
+	 	    size_gb 128
+	 	        	
+	 	    // An optional float attribute to specify the storage service cost (in Euro).
+	 	    cost 4.50
+	 	        	
+	 	}
+	 	  
+	 	        
+	 	/*
+	 	 * We may also need to model services used to execute pure business logic/algorithms on a set of input data.
+	 	 * To do so, we can use the FunctionAsAService class, which represents a pure software infrastructure
+	 	 * component capable of executing functional algorithms through an API.
+	 	 * We, therefore, use the keyword "faas" followed by an ID and braces to introduce such components.
+	 	 * For such elements, we usually only define the service cost as an attribute.
+	 	 */
+	 	faas ext_service_api {
+	 	  	      	
+	 	    cost 25.50
+	 	    
+	 	}
+	 	  
+	 	  
+	 	/*
+	 	 * We should now describe images generating VMs and containers.
+	 	 * 
+	 	 * As already stated above, we have two classes for such purpose: the VMImage class and the ContainerImage class.
+	 	 * The first one represents the image (i.e., the set of attributes and parameters) that can be used to generate a virtual machine,
+	 	 * whereas the second one represents the same concept, but for containers.
+	 	 * 
+	 	 * First of all, please note that more than one VM or container can be generated using the same image.
+	 	 * 
+	 	 * What we may want to specify, for both classes, is the following:
+	 	 * 	- The URI of the file containing the computing node generation image or file
+	 	 * 	- Whether the generator uses a node image or a file
+	 	 * 	- The generated VMs/containers
+	 	 * 
+	 	 * To define a VMImage element, we use the keyword "vm_image" followed by an ID and braces,
+	 	 * within which we define some attributes as shown below.
+	 	 */
+	 	vm_image vm1_img {
+	 	  	       	
+	 	    /*
+	 	     * We use the keyword "generates" to list the VMs generated by this image, by specifying their IDs.
+	 	     * For this example, let's assume this VM image generates the VM having ID "vm1" we defined above.
+	 	     */ 
+	 	    generates { 
+	 	    	vm1
+	 	    	//vm2 ... (example)
+ 	    	}
+	 	         	
+	 	    /*
+	 	     * We now have to specify whether the generator uses an image or a script.
+	 	     * We therefore can use the keyword "image" or the keyword "script", followed by a string
+	 	     * containing the URI of the file containing the computing node generation image/file.
+	 	     * For this example, let's assume the VM is generated by using an image.
+	 	     */
+	 	    image "/home/user1/vm.iso"
+	 	    
+	 	}
+	 	         
+	 	/*
+	 	 * Let's now repeat the same steps for the container generator.
+	 	 * To define a ContainerImage element, we use the keyword "cont_image" followed by an ID and braces,
+	 	 * analogously to what is shown for the VMImage class.
+	 	 */
+	 	cont_image cont1_img {
+	 	  	        	
+	 	    generates { 
+	 	    	cont1
+	 	    	//cont2 ... (example)
+ 	    	}
+	 	          	
+	 	    /*
+	 	     * This time, let's assume the container is generated by using a docker file.
+	 	     * The way to define it is analogous to the one shown above, we just need to change the keyword.
+	 	     */
+	 	    script "/home/user1/cont.dockerfile"
+	 	          	
+	 	}
+	 	          
+	 	          
+	 	/*
+	 	 * Next, we should define credentials for computing nodes.
+	 	 * In DOML, we can describe two different types of credentials.
+	 	 * The KeyPair Class is used to define the key pair generated in a specific computing node
+	 	 * with the encryption algorithm, which will be used for the login.
+	 	 * Instead, the UserPass class is used to define the user and password for login to a specific computing node.
+	 	 * Here is shown how they both work in detail.
+	 	 */
+	 	  
+	 	/*
+	 	 * To define key pair credentials, we use the keyword "key_pair" followed by an ID and braces.
+	 	 */
+	 	key_pair vm1_credentials {
+	 	  	
+	 	  	// An optional string attribute to specify the user name.
+	 	  	user "user"
+	 	  	
+	 	  	// An optional string attribute to specify the public key. If the attribute is not specified, keys are auto-generated.
+			key "AAAAB3NzaC1yc2EAAAADAQABAAABAQC63..."
+	 	  	
+	 	  	// An optional string attribute to indicate the encryption algorithm name.
+	 	  	algorithm "RSA"
+	 	  	
+	 	  	// An optional integer attribute to specify the number of the bits used in the algorithm.
+	 	  	bits 4096
+	 	  	
+	 	}
+	 	  
+	 	/*
+	 	 * To define user-password credentials, we use the keyword "user_pass" followed by an ID and braces.
+	 	 */
+	 	user_pass phser_credentials {
+	 	  	
+	 	  	// An optional string attribute to specify the user name.
+	 	  	user "user"
+	 	  	
+	 	  	// An optional string attribute to specify the password.
+	 	  	pass "****password****"
+	 	  	
+	 	}
+	 	  
+	 	  
+	 	/*
+	 	 * Then, we can describe computing groups, which are groups of computing nodes.
+	 	 * 
+	 	 * With this version of DOML, we can define groups through the use of the AutoScalingGroup class.
+	 	 * Such a class allows configuring a set of nodes to act as a group supporting auto-scaling functionality.
+	 	 * 
+	 	 * To define an auto-scaling group, we use the keyword "autoscale_group" followed by an ID and braces.
+	 	 * Within the braces, we first have to describe the VM template and then set some attributes defining the characteristics of the group.
+	 	 */
+	 	autoscale_group ag_group {
+	 	  	
+	 	  	// The VM template. Please note that this VM element must not be concretized.
+	 	  	vm ag_vm {
+	 	  		
+				// VM description, analogous to what is shown above for the VM elements
+				arch "x86-64"
+				os "CentOS-7-2111"
+				// ...and so on...
+	 	  	
+	 	  	}
+	 	  	
+	 	  	// An integer attribute to specify the minimum number of computing nodes.
+	 	  	min 1
+	 	  	
+	 	  	// An integer attribute to specify the maximum number of computing nodes.
+	 	  	max 4
+	 	  	
+	 	  	/*
+	 	  	 * The load balancer used in the auto-scaling group.
+	 	  	 * There can be three different load balancer kinds: default, internal and external.
+	 	  	 */
+	 	  	load_balancer default
+	 	  	
+	 	} 
+	 	 
+	 	   
+	 	/*
+	 	 * We can define the security rules for the networks through the SecurityGroup class,
+	 	 * which describes a resource used to secure access to a specific network.
+	 	 * Each security group consists of one or more rules, which can be described through the usage of the Rule class.
+	 	 * To define a security group, we use the keyword "security_group" followed by an ID and braces.
+	 	 * Within the braces are specified the rules and the network interfaces associated with the security group.
+	 	 */
+		security_group sec_group {
+	 	   	
+	 	   	/*
+	 	   	 * A rule applies either to inbound traffic (ingress) or outbound traffic (egress).
+	 	   	 * The rule kind must be specified through the usage of the corresponding keyword "ingress" or "egress",
+	 	   	 * put right before the ID of the rule.
+	 	   	 * Here is shown how a rule is defined through its attributes.
+	 	   	 */
+			egress icmp {
+				
+				// A string attribute to specify the protocol for the rule.
+				protocol "ICMP"
+				
+				/*
+				 * An integer attribute to specify the start port.
+				 * Please note that "-1" is the value to include all the available ports.
+				 */
+				from_port -1
+				
+				// An integer attribute to specify the end port.
+				to_port -1
+				
+				/*
+				 * To define the CIDR block of IPs, we can specify one or more strings within the square brackets,
+				 * separating the strings with blank spaces or new lines.
+				 */
+				cidrs ["0.0.0.0/0"]
+			}
+			
+			ingress http {
+				
+				protocol "TCP"
+				from_port 80
+				to_port 80
+				cidrs ["0.0.0.0/0"]
+			
+			}
+			
+			// other rules
+			
+			/*
+			 * To specify the list of the network interfaces associated with this security group,
+			 * we use the keyword "ifaces" followed by the IDs of such interfaces.
+			 * 
+			 * Please note that one network interface could be associated with more than one security group.
+			 */
+			ifaces {
+				phser_net1
+				vm1_net1
+			}
+	 	   	
+	 	}
+	
+	
+		/*
+		 * Monitoring rules were introduced in DOML to add support for security-related metrics
+		 * and expressing self-healing action.
+		 * To configure the monitoring services available in PIACERE, the user needs to
+		 * define monitoring rules at Infrastructure Layer.
+		 * The MonitoringRule Class is used to model a set of configuration parameters
+		 * valid for the PIACERE monitoring module.
+		 * To describe a rule, we use the keyword "monitoring_rule" followed by an ID and braces.
+		 * 
+		 * Here we show three possible examples of monitoring rules.
+		 */
+		monitoring_rule mon_rule1 {
+			
+			/* 
+			 * A formal string attribute, whose value is dependent on the strategy attribute,
+			 * that defines the condition that will trigger the monitoring.
+			 */
+			cond "sec_anomaly > 0.5"
+			
+			// A string attribute to specify the name of the monitoring strategy this rule will use.
+			strat "notify"
+			
+			// An optional string attribute to specify parameters valid for the given monitoring strategy.
+			config "Security anomaly detected. Please, check the logs of security monitoring."
+			
+		}
+		
+		monitoring_rule mon_rule2 {
+			
+			cond "sca.policy < 0.5"
+			
+			strat "notify"
+			
+			config "SCA summary: sca.policy : Score less than 50% (sca.score ). SCA scan threshold is belowthe accepted level. Please consider hardening the OS."
+			
+		}
+		
+		monitoring_rule mon_rule3 {
+			
+			cond "{
+				\"module\": \"performance\",
+				\"disable\": false,
+				\"rule_group_config\": {
+					\"name\": \"test\",
+					\"interval\": \"1m\",
+					\"rules\": [
+						{
+							\"expr\": \"\",
+							\"for\": \"5m\",
+							\"labels\": {
+								\"severity\": \"critical\"
+							},
+							\"annotations\": {
+								\"description\": \"This is a test\"
+							},
+							\"grafana_alert\": {
+								\"id\": 5,
+								\"orgId\": 1,
+								\"title\": \"test\",
+								\"condition\": \"B\",
+								\"data\": [
+									{
+										\"refId\": \"A\",
+										\"queryType\": \"\",
+										\"relativeTimeRange\": {
+											\"from\": 600,
+											\"to\": 0
+										},
+										\"datasourceUid\": \"{{ datasource_uid }}\",
+										\"model\": {
+											\"hide\": false,
+											\"intervalMs\": 1000,
+											\"maxDataPoints\": 43200,
+											\"query\": \"from(bucket: \\\"bucket\\\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r[\\\"_measurement\\\"] == \\\"cpu\\\")\n|> filter(fn: (r) => r[\\\"cpu\\\"] == \\\"cpu-total\\\")\n|> filter(fn: (r) => r[\\\"_field\\\"] == \\\"usage_user\\\")\n|> filter(fn: (r) => r[\\\"deployment_id\\\"] == \\\"{{ deployment_id }}\\\")\n|> filter(fn: (r) => r[\\\"doml_element_name\\\"] == \\\"{{ doml_element_name }}\\\")\n|> keep ( columns: [\\\"_time\\\", \\\"_field\\\", \\\"_value\\\"])\",
+											\"refId\": \"A\"
+										}
+									},
+									{
+										\"refId\": \"B\",
+										\"queryType\": \"\",
+										\"relativeTimeRange\": {
+											\"from\": 0,
+											\"to\": 0
+										},
+										\"datasourceUid\": \"-100\",
+										\"model\": {
+											\"conditions\": [
+												{
+													\"evaluator\": {
+														\"params\": [
+															35
+														],
+														\"type\": \"gt\"
+													},
+													\"operator\": {
+														\"type\": \"and\"
+													},
+													\"query\": {
+														\"params\": [
+															\"A\"
+														]
+													},
+													\"reducer\": {
+														\"params\": [],
+														\"type\": \"last\"
+													},
+													\"type\": \"query\"
+												}
+											],
+											\"datasource\": \"{\\\"type\\\":\\\"__expr__\\\",\\\"uid\\\":\\\"-100\\\"}\",
+											\"hide\": false,
+											\"intervalMs\": 1000,
+											\"maxDataPoints\": 43200,
+											\"refId\": \"B\",
+											\"type\": \"classic_conditions\"
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}" 
+			
+			strat "ansible"
+			
+			config "{ code: 'https://git.code.tecnalia.com/piacere/public/ansible_strat/harden_ports_fw.yml', allow_ports: [ 80, 443 ] }"
+			
+		}
+			
+	}
+	
+	
+	
+	/*
+	 * After the description of the infrastructure layer, we must define one or more configurations to describe 
+	 * how our application is intended to be deployed on top of the cloud infrastructure.
+	 * To describe a configuration, we use the keyword "deployment" followed by an ID and braces.
+	 * Within the braces, we define associations between application components and infrastructure elements that will host them.
+	 * For example, a virtual machine could host a web application.
+	 * Here we show how to define such associations.
+	 */
+	deployment deploy_config1 {
+		
+		/*
+		 * Each association consists of an application component and an infrastructure element.
+		 * We, therefore, specify the ID of a specific application component followed by the symbol "=>"
+		 * and then specify the ID of the infrastructure element that will host such an application component.
+		 * To separate associations, we use blank spaces or new lines.
+		 */
+		dbms1 => vm1
+		web_server => physical_server
+		oracledb => ex_env1
+		// ...
+	}
+	
+	// Another example of deployment configuration
+	deployment deploy_config2 {
+		dbms1 => physical_server
+		web_server => vm1
+		oracledb => ex_env1
+	}
+	
+	/*
+	 * We then have to specify which configuration needs to be set as active.
+	 * To do so, we use the keywords "active deployment" followed by the ID of the desired configuration.
+	 */
+	active deployment deploy_config1
+	
+	
+	
+	/*
+	 * Next, we have to move to the Concrete Layer, which provides the tools to concretize the 
+	 * infrastructure elements defined in the Infrastructure Layer and map them onto specific 
+	 * infrastructure instances either provided by cloud runtime providers or by the users.
+	 * 
+	 * In the Concrete Layer, we can define more than one possible concretization and decide which one to set as active.
+	 * We then start by using the keyword "concretizations" followed by braces, within which
+	 * we can describe the different concretizations.
+	 */
+	concretizations {
+		
+		/*
+		 * To describe a possible concretization, we use the keyword "concrete_infrastructure"
+		 * followed by an ID and braces.
+		 */
+		concrete_infrastructure concrete_infra {
+			
+			/*
+			 * We first want to specify the cloud resources provider.
+			 * The RuntimeProvider class is intended to model all the parameters related to a specific cloud IaaS provider.
+			 * 
+			 * To describe such a provider, we use the keyword "provider" followed by an ID and braces.
+			 * Within the braces, we then define all the concrete elements that will have 
+			 * an abstract infrastructure element component mapped onto them.
+			 */
+			provider aws {
+				
+				/*
+				 * Some information related to the provider can be specified through properties.
+				 */
+				properties {
+					
+					// ...
+					
+				}
+				
+				/*
+				 * In this layer we describe concrete elements.
+				 * For each of them, we can specify the following optional attributes:
+				 *  - "resource_name", a string to specify the name of the resource
+				 * 	- "preexisting", a boolean to mark if the resource is pre-existing
+				 * 	- "refs_to", a set of references to other concrete elements
+				 * 	- "script", an optional URI (string) to the script that has to be executed
+				 * 				to correctly configure a node
+				 * 
+				 * These four attributes can be used for any concrete element described below
+				 * and need to be specified before any other class-specific attribute.
+				 */
+				
+				/*
+				 * To describe some concrete generic resources that are specialized in different
+				 * IaC languages, we can use the GenericResource Class.
+				 * 
+				 * A generic resource can be introduced by the keyword "generic_resource"
+				 * followed by an ID and braces.
+				 * The only class-specific attribute for this class is the "type" attribute, shown below.
+				 */
+				generic_resource datacenter {
+					
+					// One of the attributes available for any concrete element.
+					resource_name "DC"
+					
+					// An optional string attribute to describe the type of the resource.
+					type "datacenter"
+					
+					/*
+					 * As explained above, the attribute "resource_name" must be specified
+					 * before the "type" attribute, since the second one is a class-specific
+					 * attribute, whereas the first one is one of the four attributes
+					 * available for any concrete element.
+					 */
+				}
+			
+				/*
+				 * Here we define another generic resource to provide an example for each
+				 * of the attributes available for any concrete element.
+				 */
+				generic_resource compute_cluster {
+					
+					// Attributes that can be used for any concrete element
+					
+					resource_name "CCL"
+					
+					preexisting true
+					
+					refs_to {
+						datacenter
+						// ...
+					}
+					
+					script "/home/user1/ccl_config.yml"
+					
+					// Generic resources specific attributes
+					
+					type "compute_cluster"
+				}
+					
+				/*
+				 * We now want to define all the other concrete elements and specify which infrastructure elements they map to.
+				 * We first define concrete computing nodes in this section, which means
+				 * concrete VM instances provided by the cloud resources provider.
+				 * 
+				 * As for the corresponding infrastructure layer element, we use the keyword "vm"
+				 * followed by an ID and braces.
+				 */
+				vm concrete_vm1 {
+					
+					// We can always specify properties for concrete elements, as for any other DOML element.
+					
+					/*
+					 * An optional class-specific string attribute to specify the desired machine type.
+					 * Such a concept is used by all the main cloud providers, but it is named in several
+					 * different ways (e.g., "instance type" on AWS, "size" on Azure, "flavor" on Openstack, etc.).
+					 */
+					vm_type "t2.micro"
+					
+					/*
+					 * To specify that an abstract infrastructure element maps onto this concrete element,
+					 * we use the keyword "maps" followed by the ID of such abstract infrastructure element.
+					 */
+					maps vm1
+					
+				}
+				
+				/*
+				 * Execution environments defined for specific services need to be concretized too.
+				 * To do so, we use the keyword "exec_env" followed by an ID and braces.
+				 */
+				exec_env concrete_ex_env1 {
+					
+					/*
+					 * An optional class-specific string attribute to specify the desired machine type
+					 * for the VM hosting the service. It is analogous to the "vm_type" attribute
+					 * shown for the concrete VM class above.
+					 */
+					instance_type "db.m3.medium"
+					
+					/*
+					 * An optional class-specific string attribute to specify the desired storage type
+					 * required for the service (e.g., General Purpose SSD types or Provisioned IOPS SSD
+					 * storage types for AWS).
+					 */
+					storage_type "gp2"
+					
+					maps ex_env1
+					
+				}
+				
+				/*
+				 * Also VM and container images have corresponding concrete elements.
+				 * The usage of such elements is quite simple since we can just specify properties and
+				 * elements they're mapped to.
+				 * The keywords we use are the same as for the abstract elements ("vm_image" and "cont_image" respectively).
+				 * 
+				 * For a concrete VM image, we can also specify the image name used by the provider
+				 * through the optional "image_name" string attribute.
+				 */
+				vm_image concrete_vm1_img {
+					
+					// Properties...
+					
+					// An optional string attribute to specify the image name used by the provider (e.g., "ami-000e50175c5f86214").
+					image_name "ami-..."
+					
+					maps vm1_img
+					
+				}
+				
+				cont_image concrete_cont1_img {
+					
+					// Properties...
+					
+					maps cont1_img
+					
+				}
+				
+				/*
+				 * To describe a concrete network, we use the keyword "net".
+				 * We can specify the address range of the network by using
+				 * the "cidr" attribute as shown below.
+				 */
+				net concrete_net1 {
+					
+					// Properties...
+					
+					protocol "TCP/IP"
+					
+					/*
+			 	     * An optional string attribute to describe the valid addresses in this particular network.
+			 	     * For TCP/IP networks, the value of this attribute must be composed of an IP address
+			 	     * followed by the "/" symbol and the netmask length.
+			 	     */
+			 	    cidr "16.0.0.0/24"
+					
+					maps net1
+					
+				}
+				
+				net concrete_net2 {
+					
+					protocol "TCP/IP"
+					
+					cidr "16.0.1.0/24"
+					
+					/*
+					 * When describing concrete networks, we have to define concrete subnets too.
+					 * The definition of concrete subnets is analogous to the one of main networks.
+					 * Here we show an example.
+					 */
+					subnet concrete_net2_sub1 {
+						
+						// As for main networks, we can specify the address range.
+						cidr "16.0.1.0/25"
+						
+						maps net2_sub1
+					}
+					
+					subnet concrete_net2_sub2 {
+						
+						cidr "16.0.1.128/25"
+						
+						maps net2_sub2
+					}
+					
+					maps net2
+				}
+				
+				/*
+				 * We use the keyword "storage" to define a concrete storage element.
+				 * This class has no specific attributes.
+				 */
+				storage concrete_hdd1 {
+					
+					// Properties...
+					
+					maps hdd1
+					
+					
+				}
+			
+				/*
+				 * We use the keyword "faas" to define a specific functional logic service instance.
+				 * This class has no specific attributes.
+				 */
+				faas concrete_ext_service_api {
+					
+					// Properties...
+					
+					maps ext_service_api
+				
+				}
+				
+				/*
+				 * As for VMs, auto-scaling groups need to be concretized: as for the corresponding
+				 * infrastructure layer element, we use the keyword "autoscale_group" followed by an ID and braces.
+				 * 
+				 * Please note that when concretizing an autoscaling group, the VM element defined as a template
+				 * within its description in the abstract Infrastructure Layer must not be concretized. 
+				 */
+				autoscale_group concrete_ag_group {
+					
+					// Properties...
+					
+					/*
+					 * An optional class-specific string attribute to specify the desired machine type
+					 * for the VM defined as a template.
+					 * It is analogous to the one defined for the VirtualMachine class shown above.
+					 */
+					vm_type "t2.micro"
+					
+					maps ag_group
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		
+		// We can define several different concretizations.
+		concrete_infrastructure concrete_infra2 {
+			// Concrete elements to be defined...
+		}
+		
+		/*
+		 * After defining possible concretizations, we have to specify which one is the active infrastructure.
+		 * To do so, we use the keyword "active" followed by the ID of the desired concretization.
+		 */
+		active concrete_infra
+	}
+	
+	
+	/* 
+	 * DOML allows the user to define objectives and restrictions the DOML design must meet.
+	 * To do so, we use the Requirement class, which can be used to specify functional, non-functional
+	 * or optimization objectives.
+	 * 
+	 * Functional objectives must be defined after the Concrete Layer and are introduced by the keyword "functional_requirements",
+	 * whereas both non-functional and optimization objectives are defined in the Optimization Layer, shown below.
+	 * 
+	 * In DOML, we can distinguish three kinds of requirements:
+	 * 		- Normal requirements are used to define more informal requirements; they mainly consist of a description in words.
+	 * 		- Ranged requirements are used to define formal requirements which establish a range of valid values for a property.
+	 * 		- Enumerated requirements are used to describe formal requirements that restrict the number of valid values that a property may take.
+	 * 
+	 * Here we show an example of a normal requirement, leaving the examples for both ranged and enumerated requirements
+	 * for the Optimization Layer.
+	 */
+	functional_requirements {
+		
+		/*
+		 * First of all, for each kind of requirement, we need to specify an ID and optionally
+		 * a string containing a description of the requirement itself.
+		 * Let's now focus on how to keep building a normal requirement.
+		 * 
+		 * Right after the description, we could optionally use the symbol "@"
+		 * followed by curly braces, within which we can list the IDs of the elements
+		 * the requirement predicates on (e.g., "... @ { vm1 vm2 ... }").
+		 * 
+		 * Finally, we have to use the symbol "=>" followed by a string, specifying
+		 * the property the requirement refers to.
+		 * 
+		 * Let's look at a more practical example to understand how to operate with such kind of requirements.
+		 * In this example, we want to specify that access to VMs (in our case, only "vm1") requires key pair credentials using
+		 * RSA as encryption algorithm:
+		 * 	- First, we use a meaningful ID for our requirements (in this case, "vm_access_req" is our ID)
+		 * 	- We then describe the requirement through the description string
+		 *  - We now want to specify that such a requirement applies for the element having ID "vm1_credentials";
+		 *  therefore, we use the symbol "@", followed by such ID.
+		 * 	- Finally, we want to specify the property the requirement refers to: first, we use the symbol "=>";
+		 * 	then, since we want to specify the type of algorithm to use for key pair credentials to access VMs, 
+		 * 	in this case, we indicate the property "algorithm" in quotation marks.
+		 */
+		vm_access_req "Access to VMs requires the use of key pair credentials using RSA as encryption algorithm" @ { vm1_credentials } => "algorithm"
+		
+		// Let's now move to the Optimization Layer.
+		// In the "nonfunctional_requirements" section it is shown how both ranged and enumerated requirements work.
+	}
+	
+	
+	/*
+	 * The Optimization Layer is intended to be used as a container for objectives and solutions
+	 * associated with the optimization algorithms for a DOML model.
+	 * 
+	 * It is introduced by the keyword "optimization" followed by the ID "opt"
+	 * and it can be easily divided into two sections, as shown below.
+	 * The user must fill it by describing optimization objectives and non-functional requirements for the DOML design,
+	 * whereas the optimization algorithms return possible solutions within the layer, using it as a container
+	 * (not shown in this tutorial).
+	 * 
+	 * It is important to note that neither blank lines nor comments can be used in the optimization layer. 
+	 * However, since this is a tutorial, here we use comments to briefly explain each section.
+	 */
+	optimization opt {
+		
+		/*
+		 * The first section to be filled in is the one containing optimization objectives.
+		 * It is introduced by the keyword "objectives" followed by curly braces.
+		 * 
+		 * At this moment, three different objectives can be considered in this section:
+		 * minimizing the cost, maximizing the availability, and maximizing the performance.
+		 * 
+		 * Please note that any combination of these objectives can be introduced and that
+		 * the order in which they're written is used to establish a priority among them.
+		 */
+		objectives {
+			
+			/*
+			 * Here we show an example containing each of the three possible objectives,
+			 * but the user could choose to only set some of them.
+			 */
+			"cost" => min
+			"availability" => max
+			"performance" => max
+		}
+		
+		/*
+		 * The second section in the optimization layer concerns non-functional requirements.
+		 * It is introduced by the keyword "nonfunctional_requirements" followed by braces.
+		 * 
+		 * At this moment, five different kinds of requirements can be considered in this section:
+		 * 
+		 * 	- Assign a maximum cost for the overall configuration
+		 * 	- Assign a minimum availability for the overall configuration
+		 * 	- Assign a minimum performance for the overall configuration
+		 * 	- Restrict the region of the selected elements
+		 * 	- Restrict the providers of the elements
+		 * 
+		 * The PIACERE Optimizer can find solutions that combine virtual machines, storage, and databases.
+		 * To specify which elements are needed for the desired configuration, the user needs
+		 * to describe one more requirement, which follows a syntax that is shown below in the last requirement.
+		 */
+		nonfunctional_requirements {
+			
+			/*
+			 * Let's now take a look at ranged requirements: as for any other type of requirement, we start with an ID
+			 * and a string used as a further description of the requirement.
+			 * 
+			 * For example, let's assume we want to limit the cost to be less than or equal to 1200.0.
+			 * First of all, we need to specify an ID and a description string.
+			 * Right after the description, we want to set the range limits using the keywords "min" and "max":
+			 * in this case, we only have a "max", since we want an upper limit for the cost.
+			 * We, therefore, use the keyword "max" followed by the value we want to set as the upper limit (in this case, 1200.0).
+			 * It's important to notice that we can only use floats after the keywords "min" and "max".
+			 * Finally, we want to specify the requirement refers to the "cost" property: we use the symbol "=>"
+			 * followed by the name of the property in quotation marks.
+			 * 
+			 * Below we show the first three kinds of requirements that can be specified in this section.
+			 */
+			req1 "Cost <= 1200.0" max 1200.0 => "cost"
+			req2 "Availability >= 98.0%" min 98.0 => "availability"
+			req3 "Performance >= 10.0%" min 10.0 => "performance"
+			
+			/*
+			 * DOML allows using both "min" and "max" to set both lower and upper limits of the range of possible values.
+			 * After the description string, we start by defining the minimum value by using the keyword "min"
+			 * followed by such a lower limit value, then we use the keyword "max" followed by the value
+			 * we want to use as the upper limit.
+			 * We then proceed as already done for the previous example and specify the property
+			 * the requirement refers to.
+			 * 
+			 * As already shown for normal requirements, we may also specify the DOML Elements to which
+			 * we want to apply the requirement: to do so, right after the requirement description,
+			 * we put the symbol "@" followed by braces, within which the IDs of such elements can be listed.
+			 * 
+			 * Anyway, at the moment, the optimization layer doesn't support such kinds of requirements.
+			 * We provide here in the comments an example in case the user needs to define specific constraints
+			 * in the functional requirements section.
+			 * 
+			 * mem_req "1024.0 <= Mem MB <= 16384.0" @ { vm1 physical_server } min 1024.0 max 16384.0 => "mem_mb"
+			 */
+	
+			/*
+			 * Let's now move to the last type of requirement, the enumerated requirement.
+			 * 
+			 * For this example, let's assume we want to restrict the region of the elements
+			 * location to assume the value "00EU".
+			 * 
+			 * As we have already seen for other requirements, we start by specifying an ID and a description.
+			 * After the description, we use the keyword "values" followed by the list of the possible
+			 * values we want the property to take: for this example, since we want the region to be "00EU",
+			 * we insert such a value (between quotation marks) after the keyword.
+			 * 
+			 * What follows the values is analogous to what we have seen for other requirements:
+			 * we use the symbol "=>" followed by the name of the property the requirement refers to between quotation marks
+			 * ("region", in this case).
+			 * 
+			 * Below we show the last two kinds of requirements that can be specified in this section.
+			 */
+			req4 "Region" values "00EU" => "region"
+			req5 "Provider" values "aws" => "provider"
+			
+			/*
+			 * DOML also allows specifying two or more values (to be separated by using blank spaces)
+			 * and the involved DOML Elements for an enumerated requirement, as we have already seen,
+			 * by using the symbol "@" followed by curly braces enclosing the list of their IDs.
+			 * 
+			 * Anyway, at the moment, the optimization layer doesn't support such kinds of requirements.
+			 * We provide here in the comments an example in case the user needs to define specific constraints
+			 * in the functional requirements section.
+			 * 
+			 * region_req "Region" values "00EU" "01EU" => "region";
+			 */
+			
+			/*
+			 * Finally, the user needs to specify the combination of elements they are searching for.
+			 * To do so, we use the "elements" requirement, which has the following structure:
+			 * 	- First, we start by specifying an ID
+			 * 	- Then, we use the keyword "elements" in quotation marks as a requirement description
+			 * 	- We insert the "=>" symbol
+			 * 	- Finally, we specify the elements required in a string, in which elements are separated by blank spaces.
+			 * 
+			 * Elements can be:
+			 * 	- Virtual Machines ("VM" keyword used)
+			 * 	- Databases ("DB")
+			 * 	- Storage ("Storage")
+			 * 
+			 * The elements requirement can contain any combination of these elements.
+			 * For example, if the user needs to deploy a service with 3 different virtual machines
+			 * and a database, the string could be "VM VM VM DB".
+			 * Anyway, elements can be listed in any order (e.g., "VM DB VM VM" would produce
+			 * the same result as the string written above).
+			 * 
+			 * In the example below, we show how to specify the need for two VMs, a storage, and a database.
+			 * 
+			 * Please note that the elements requirement is optional.
+			 * In case the user does not introduce this information, the optimizer considers the basic problem.
+			 * That is, finding the best configuration combining one single unit per element (VM DB Storage).
+			 */
+			req6 "elements" => "VM VM DB Storage"
+			
+		}
+		
+		/*
+		 * Please notice that currently the optimizer does not handle auto-scaling groups
+		 * and execution environments.
+		 * Therefore, after optimizing the model, the user has to manually modify the generated
+		 * optimized concrete infrastructures to specify the attributes of such classes.
+		 */
+		
+		/*
+		 * This space will contain possible solutions generated by the optimization algorithms.
+		 * The reserved symbols and keywords for this part are the following:
+		 *  - "solution"
+		 *  - "decisions"
+		 *  - "runtime"
+		 *  - "value"
+		 *  - "seconds"
+		 *  - "euro"
+		 *  - '%'
+		 *  - "metric"
+		 */
+	}
+
+}
+
+/*
+ * Please note that the following symbols and keywords are reserved, though currently unused in DOML:
+ *  - '#'
+ *  - "swarm"
+ *  - "manager"
+ *  - "worker"
+ *  - "master"
+ *  - "hint"
+ *  - "group"
+ *  - "nodes"
+ */ 
